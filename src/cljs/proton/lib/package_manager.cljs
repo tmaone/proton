@@ -9,7 +9,8 @@
             [proton.lib.proton :as proton]
             [proton.lib.helpers :as helpers]))
 
-(def sys (node/require "sys"))
+;; gives soft error in init. also not used
+;; (def sys (node/require "sys"))
 (def child-process (node/require "child_process"))
 
 (defonce packages (atom {}))
