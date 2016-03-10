@@ -17,11 +17,19 @@
     [:linter-bootlint
      :linter-xmllint]))
 
+<<<<<<< HEAD
 ;; gives error during init
 ;; (defmethod init-package [:lang/html :autoclose-html] []
 ;;  (let [additionalGrammars (array-seq (atom-env/get-config "autoclose-html.additionalGrammars"))]
 ;;    (atom-env/set-config! "autoclose-html.additionalGrammars" (distinct (concat additionalGrammars ["XSL" "XML"])))))
 
+||||||| merged common ancestors
+(defmethod init-package [:lang/html :autoclose-html] []
+  (let [additionalGrammars (array-seq (atom-env/get-config "autoclose-html.additionalGrammars"))]
+    (atom-env/set-config! "autoclose-html.additionalGrammars" (distinct (concat additionalGrammars ["XSL" "XML"])))))
+
+=======
+>>>>>>> dvcrn/master
 (defmethod init-package [:lang/html :emmet] []
   (mode/define-package-mode :emmet
     {:mode-keybindings

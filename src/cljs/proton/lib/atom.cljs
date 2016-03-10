@@ -51,9 +51,12 @@
 (defn get-config [selector]
   (.get config selector))
 
-(defn set-config! [selector value]
-  (console! (str "Setting " selector " to " (clj->js value)))
-  (.set config selector (clj->js value)))
+(defn set-config!
+  ([selector value]
+   (set-config! selector value {}))
+  ([selector value opts]
+   (console! (str "Setting " selector " to " (clj->js value) " options: " (clj->js opts)))
+   (.set config selector (clj->js value) (clj->js opts))))
 
 (defn add-to-config! [selector value]
   (let [previous-config (js->clj (.get config selector))]
@@ -134,8 +137,14 @@
         (.dispatch commands dom-target action)))
     (deactivate-proton-mode!)))
 
+(defn eval-actions! [action-vector]
+  (doall (map eval-action! action-vector))
+  (reset! last-action action-vector))
+
 (defn eval-last-action! []
-  (eval-action! @last-action))
+  (if (vector? @last-action)
+    (eval-actions! @last-action)
+    (eval-action! @last-action)))
 
 (defn get-all-settings []
   (let [config-obj (.getAll config)
