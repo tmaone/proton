@@ -19,12 +19,14 @@
             [proton.layers.tools.build.core]
             [proton.layers.tools.bookmarks.core]
             [proton.layers.tools.todo.core]
+            [proton.layers.tools.terminal.core]
 
             ;; etc
             [proton.layers.fun.power_mode.core]
 
             ;; langs
             [proton.layers.lang.clojure.core]
+            [proton.layers.lang.swift.core]
             [proton.layers.lang.csharp.core]
             [proton.layers.lang.python.core]
             [proton.layers.lang.julia.core]
@@ -59,7 +61,7 @@
             [proton.config.proton :as proton-config]
 
             [cljs.core.async :as async :refer [chan put! pub sub unsub >! <!]]
-            [clojure.string]))
+            ))
 
 ;; Atom for holding all disposables objects
 (def disposables (atom []))
