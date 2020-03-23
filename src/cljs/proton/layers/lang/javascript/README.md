@@ -9,8 +9,6 @@ Includes following atom packages:
 - [language-javascript](https://atom.io/packages/language-javascript)
 - [autocomplete-modules](https://atom.io/packages/autocomplete-modules)
 - [docblockr](https://atom.io/packages/docblockr)
-- [react](https://atom.io/packages/react)
-- [react-snippets](https://atom.io/packages/react-snippets)
 
 ### Install
 
@@ -67,6 +65,7 @@ Name                                        | Default | Type        | Title     
 |------------------------|--------------------------------|
 | <kbd>SPC m g g</kbd>   | Tern jump to definition        |
 | <kbd>SPC m g q</kbd>   | Tern jump back from definition |
+| <kbd>SPC m g h</kbd>   | Tern show documentation        |
 | <kbd>SPC m g r</kbd>   | Tern list references           |
 | <kbd>SPC m s l</kbd>   | Show file symbols              |
 | <kbd>SPC m r r v</kbd> | Tern rename variable           |

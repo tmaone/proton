@@ -18,7 +18,8 @@
 (def keystroke->keybinding-map
    {"/" :slash
     ":" :colon
-    ";" :semicolon})
+    ";" :semicolon
+    "'" :quote})
 
 (defn keystroke->keybinding
   "Remove 'shift-' prefix from keystroke. For uppercase letter atom keystroke will be
@@ -132,7 +133,7 @@
 
 
 (defn is-proton-target? [e]
-  (let [target (.-target e)
+  (let [target (or (.closest (.-target e) "atom-text-editor") (.-target e))
         tag-name (string/lower-case (.-tagName target))
         class-list (set (array-seq (.-classList target)))
         ignored-tags #{"input" "textarea"}
@@ -142,7 +143,8 @@
         ignored-editor-classes #{"insert-mode" "mini"}
         ignored-editor-class-ok? (empty? (cljset/intersection class-list ignored-editor-classes))
         required-editor-classes #{"vim-mode" "vim-mode-plus"}
-        required-editor-class-ok? (not (empty? (cljset/intersection class-list required-editor-classes)))]
+        vim-mode? (some #{(js/atom.config.get "proton.core.inputProvider")} ["vim-mode" "vim-mode-plus"])
+        required-editor-class-ok? (or (not (empty? (cljset/intersection class-list required-editor-classes))) (not vim-mode?))]
     (if tag-ok?
       (if (= tag-name "atom-text-editor")
         (and required-editor-class-ok? ignored-attrs-ok? ignored-editor-class-ok?)
@@ -157,12 +159,14 @@
     (let [path-chan (chan)
           shell-path (or (.-SHELL js/process.env ) "/bin/sh")]
       (go
-        (.execFile child-process shell-path (js/Array "-ic", "env; exit") (js/Object :encoding "UTF-8")
-          (fn [err stdout stderr]
-            (if (nil? err)
-              (do
-                (go (>! path-chan stdout)))
-              (go (>! path-chan false))))))
+        (let [shell (.spawn child-process shell-path (js/Array "-c", "env; exit") (js/Object :encoding "UTF-8"))]
+          (.on (.-stdout shell) "data"
+            (fn [stdout]
+              (go (>! path-chan (.toString stdout)))))
+         (.on shell "exit"
+          (fn [code]
+            (when-not (zero? code)
+              (go (>! path-chan false)))))))
       ;; on out
       (go
         (if-let [out-val (<! path-chan)]

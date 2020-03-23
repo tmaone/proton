@@ -89,14 +89,16 @@
   max-height: 500px;
   overflow-y: scroll;
   margin: 20px 0;
-  padding: 0px 12px;
+  padding: 0px 12px !important;
 
   h2 {
     color: @text-color-success;
+    margin: 0 !important;
   }
 
   table {
     width: 100%;
+    margin: 10px 0 !important;
   }
 
   tr {
@@ -131,12 +133,14 @@ atom-panel.modal.tab-switcher {
 }
 
 .proton-mode {
-  atom-pane-container {
-    opacity: 0.5;
-  }
-  atom-panel-container {
-    &.right, &.left {
+  &.proton-which-key-active {
+    atom-pane-container {
       opacity: 0.5;
+    }
+    atom-panel-container {
+      &.right, &.left {
+        opacity: 0.5;
+      }
     }
   }
 }

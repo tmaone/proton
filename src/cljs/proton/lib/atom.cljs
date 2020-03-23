@@ -23,6 +23,7 @@
 (def grammars (.-grammars (.-grammars js/atom)))
 (def workspace-view (.getView views workspace))
 (def packages (.-packages js/atom))
+(def notifications (.-notifications js/atom))
 
 (def element (atom (generate-div "test" "proton-which-key")))
 (def bottom-panel (atom (.addBottomPanel workspace
@@ -34,7 +35,6 @@
 (def modal-panel (atom (.addModalPanel workspace (clj->js {:visible false
                                                            :item @modal-element}))))
 
-(defn update-bottom-panel [html] (aset @element "innerHTML" html))
 (defn update-modal-panel [html]
   (let [element @modal-element]
     (aset element "innerHTML" html)
@@ -45,8 +45,17 @@
 (defn show-bottom-panel [] (.show @bottom-panel))
 (defn hide-bottom-panel [] (.hide @bottom-panel))
 
+(defn update-bottom-panel [html]
+  (show-bottom-panel)
+  (aset @element "innerHTML" html)
+  (.add (.-classList workspace-view) "proton-which-key-active"))
+
+(defn bottom-panel-visible? []
+  (.isVisible @bottom-panel))
+
 (defn get-apm-path []
-  (.getApmPath packages))
+  (-> (.getApmPath packages)
+      (clojure.string/replace " " "\\ ")))
 
 (defn get-config [selector]
   (.get config selector))
@@ -91,32 +100,34 @@
   (amend-last-step! (str (get (last @steps) 0)) "<span class='proton-status-ok'>[ok]</span>"))
 
 (defn input-provider-class []
-  (if-let [selected-provider (get-config "proton.core.vim-provider")]
+  (if-let [selected-provider (get-config "proton.core.inputProvider")]
     (do
       (case selected-provider
         "vim-mode" ["vim-mode"]
-        "vim-mode-plus" ["vim-mode-plus"]))
-    [""]))
+        "vim-mode-plus" ["vim-mode-plus"]
+        []))
+    []))
 
 (defn editor-toggle-classes [class-list remove?]
-  (let [editors (.getTextEditors workspace)]
-    (doseq [editor editors]
-      (let [editor-view (.getView views editor)
-            classList (.-classList editor-view)
-            class-list-fn (fn [class-name] (if remove? (.remove classList class-name) (.add classList class-name)))]
-        (doall (map class-list-fn class-list))))))
+  (when (not (empty? class-list))
+    (let [editors (.getTextEditors workspace)]
+      (doseq [editor editors]
+        (let [editor-view (.getView views editor)
+              classList (.-classList editor-view)
+              class-list-fn (fn [class-name] (if remove? (.remove classList class-name) (.add classList class-name)))]
+          (doall (map class-list-fn class-list)))))))
 
 (defn activate-proton-mode! []
   (console! "Chain activated!")
   (let [classList (.-classList workspace-view)]
     (.add classList "proton-mode")
-    (editor-toggle-classes (input-provider-class) true)
-    (show-bottom-panel)))
+    (editor-toggle-classes (input-provider-class) true)))
 
 (defn deactivate-proton-mode! []
   (console! "Chain deactivated!")
   (let [classList (.-classList workspace-view)]
     (.remove classList "proton-mode")
+    (.remove classList "proton-which-key-active")
     (editor-toggle-classes (input-provider-class) false)
     (hide-bottom-panel)))
 
@@ -162,7 +173,6 @@
                 (swap! parsed-config conj (str config-prefix "." config-postfix))))))))
     @parsed-config))
 
-
 (defn set-keymap!
   ([selector bindings]
    (set-keymap! selector bindings 0))
@@ -188,30 +198,37 @@
      (.setGrammar editor (find-grammar-by-name grammar))
      (.setGrammar editor grammar))))
 
+(defn get-original-package-name [package-name]
+  (let [all-packages (array-seq (.getAvailablePackageNames packages))
+        package (first (filter #(= (lower-case (name package-name)) (lower-case %)) all-packages))]
+      package))
+
 (defn is-activated? [package-name]
-  (.isPackageActive packages package-name))
+  (.isPackageActive packages (get-original-package-name package-name)))
 
 (defn is-package-disabled? [package-name]
-  (.isPackageDisabled packages package-name))
+  (.isPackageDisabled packages (get-original-package-name package-name)))
 
 (defn get-all-packages []
-  (.getAvailablePackageNames packages))
+  (clj->js (map lower-case (.getAvailablePackageNames packages))))
 
 (defn get-package [package-name]
-  (.getLoadedPackage packages package-name))
+  (.getLoadedPackage packages (get-original-package-name package-name)))
 
 (defn is-package-installed? [package-name]
-  (if (.isPackageLoaded packages package-name)
+  (if (.isPackageLoaded packages (get-original-package-name package-name))
     true
     (let [pkgs (get-all-packages)]
-      (not (= -1 (.indexOf pkgs package-name))))))
+      (not (= -1 (.indexOf pkgs (lower-case (name package-name))))))))
 
 (defn is-package-bundled? [package-name]
-  (.isBundledPackage packages (name package-name)))
+  (.isBundledPackage packages (get-original-package-name package-name)))
 
 (defn enable-package [package-name]
   (console! (str "enabling package " (name package-name)))
-  (.enablePackage packages package-name))
+  (if-let [p-name (get-original-package-name package-name)]
+    (.enablePackage packages p-name)
+    (console! "package not found" package-name)))
 
 
 (defn disable-package
@@ -224,10 +241,12 @@
          (when-not (is-package-disabled? package-name)
           (do
             (console! (str "disabling package " package-name))
-            (.disablePackage packages package-name)))))))
+            (if-let [p-name (get-original-package-name package-name)]
+              (.disablePackage packages p-name)
+              (console! (str "package not found" package-name)))))))))
 
 (defn is-activated? [package-name]
-  (.isPackageActive packages package-name))
+  (.isPackageActive packages (get-original-package-name package-name)))
 
 (defn reload-package [package-name]
   (disable-package package-name)

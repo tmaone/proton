@@ -9,6 +9,9 @@
             [proton.lib.atom :as atom-env :refer [get-config set-config! set-keymap!]]
             [cljs.nodejs :as node]))
 
+(defn- add-packages [p]
+  (swap! packages #(into [] (concat % p))))
+
 (def keymaps (atom
               [{:selector "body" :keymap [["ctrl-j" "core:move-down"]
                                           ["ctrl-k" "core:move-up"]]}
@@ -26,8 +29,11 @@
    ["proton.core.relativeLineNumbers" false]
    ["proton.core.quickOpenProvider" :normal]
    ["proton.core.post-init-timeout" 3000]
-   ["proton.core.vim-provider" :vim-mode-plus]
+   ["proton.core.alwaysShowWelcomeScreen" true]
    ["proton.core.wipeUserConfigs" true]
+   ["proton.core.whichKeyDelay" 0.4]
+   ["proton.core.whichKeyDelayOnInit" false]
+   ["proton.core.whichKeyDisabled" false]
 
    ;; vim-mode
    ["vim-mode-plus.useSmartcaseForSearch" true]
@@ -39,6 +45,10 @@
 
    ;; ui
    ["core.themes" ["nucleus-dark-ui" "atom-dark-fusion-syntax"]]
+
+   ;; telemetry spam
+   ["core.telemetryConsent" "no"]
+
 
    ["welcome.showOnStartup" false]
    ["editor.softWrap" true]
@@ -66,9 +76,12 @@
     (swap! state assoc-in [:relative-numbers] (config-map "proton.core.relativeLineNumbers"))
     (swap! state assoc-in [:tabs] (config-map "proton.core.showTabBar"))
 
-    (case (config-map "proton.core.vim-provider")
-      :vim-mode (swap! packages #(into [] (concat % [:vim-mode :vim-surround])))
-      :vim-mode-plus (swap! packages #(into [] (concat % [:vim-mode-plus :vim-mode-plus-ex-mode]))))))
+    ;; install additional packages based on proton.core.inputProvider if needed
+    (case (config-map "proton.core.inputProvider")
+      :vim-mode (add-packages [:vim-mode :vim-surround])
+      :vim-mode-plus (add-packages [:vim-mode-plus :ex-mode])
+      :emacs (add-packages [:atomic-emacs])
+      :default)))
 
 (defmethod init-package [:core :theme-switch] []
   (let [core-themes (string/join " " (atom-env/get-config "core.themes"))
@@ -80,9 +93,7 @@
   (atom-env/set-keymap! "atom-text-editor.vim-mode-plus.normal-mode"
     {"y s" "vim-mode-plus:surround"
      "d s" "vim-mode-plus:delete-surround"
-     "c s" "vim-mode-plus:change-surround"
-     ":" "vim-mode-plus-ex-mode:open"
-     "!" "vim-mode-plus-ex-mode:toggle-setting"})
+     "c s" "vim-mode-plus:change-surround"})
   (atom-env/set-keymap! "atom-workspace atom-text-editor.vim-mode-plus.visual-mode"
     {"s" "vim-mode-plus:surround"}))
 

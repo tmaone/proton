@@ -5,7 +5,7 @@
   ;; We gave you some cool defaults below but if you don't like it, feel free to change :)
 
   ;; Layers you wish to have active
-  ;; To get a list of all available layers, check github.com/dvcrn/proton/layers/
+  ;; To get a list of all available layers, check github.com/dvcrn/proton/tree/master/src/cljs/proton/layers
   :layers
   [
     ;; -----------------------------------
@@ -16,7 +16,7 @@
 
     ;; -----------------------------------
     ;; tools
-    ;; Get more at github.com/dvcrn/proton/tree/master/src/proton/layers/tools
+    ;; Get more at github.com/dvcrn/proton/tree/master/src/cljs/proton/layers/tools
     ;; -----------------------------------
     :tools/git
     :tools/linter
@@ -27,17 +27,34 @@
 
     ;; -----------------------------------
     ;; Languages
-    ;; Get more at github.com/dvcrn/proton/tree/master/src/proton/layers/lang
+    ;; Get more at github.com/dvcrn/proton/tree/master/src/cljs/proton/layers/lang
     ;; -----------------------------------
     ;; :lang/clojure
     ;; :lang/csharp
-    ;; :lang/python
+    ;; :lang/css
+    ;; :lang/elixir
+    ;; :lang/elm
+    ;; :lang/go
+    ;; :lang/haml
+    ;; :lang/handlebars
+    ;; :lang/haskell
+    ;; :lang/html
+    ;; :lang/jade
+    ;; :lang/javascript
+    ;; :lang/json
     ;; :lang/julia
     ;; :lang/latex
-    ;; :lang/elixir
+    ;; :lang/less
     ;; :lang/markdown
+    ;; :lang/mustache
+    ;; :lang/python
+    ;; :lang/ruby
     ;; :lang/rust
-    ;; :lang/javascript
+    ;; :lang/sass
+    ;; :lang/slim
+    ;; :lang/stylus
+    ;; :lang/swift
+    ;; :lang/typescript
 
     ;; -----------------------------------
     ;; Frameworks
@@ -47,7 +64,7 @@
 
     ;; -----------------------------------
     ;; etc
-    ;; Get more at github.com/dvcrn/proton/tree/master/src/proton/layers/fun
+    ;; Get more at github.com/dvcrn/proton/tree/master/src/cljs/proton/layers/fun
     ;; -----------------------------------
     ;; :fun/power_mode
   ]
@@ -88,10 +105,17 @@
     ["proton.core.relativeLineNumbers" false]
 
     ;; prefer classic vim mode over vim-mode-plus? Change this to :vim-mode
-    ["proton.core.vim-provider" :vim-mode-plus]
+    ["proton.core.inputProvider" :vim-mode-plus]
   ]
 
   ;; Don't like a keybinding or want to add something yourself? Do it here
+  ;; The following example adds a category `foo-category` under <SPC>z
+  ;; and adds a action under `y` with the title `execute hello`.
+  ;; Upon executing, proton will dispatch the action `hello` on the current view
+  ;;
+  ;; :keybindings {:z {:category "foo-category"
+  ;;                   :y {:title "execute hello"
+  ;;                       :action "hello"}}}
   :keybindings {}
 
   ;; Want some custom behavior inside a certain window?
